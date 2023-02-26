@@ -4,7 +4,12 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
-from account.serializers import UserRegistrationSerializer, UserLoginSerializer, UserProfileSerializer
+from account.serializers import (
+    UserRegistrationSerializer, 
+    UserLoginSerializer,
+    UserProfileSerializer, 
+    UserPasswordChangeSerializer
+    )
 from account.renderers import UserRenderer
 
 def get_tokens_for_user(user):
@@ -46,3 +51,11 @@ class UserProfileView(APIView):
         serializer = UserProfileSerializer(request.user)
         return Response(serializer.data, status=status.HTTP_200_OK)
         
+class UserPasswordChangeView(APIView):
+    renderer_classes = [UserRenderer]
+    permission_classes = [IsAuthenticated]
+    def post(self, request, format=None):
+        serializer = UserPasswordChangeSerializer(data=request.data, context={'user': request.user})
+        if serializer.is_valid(raise_exception=True):
+            return Response({'msg': 'Login Success'}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
